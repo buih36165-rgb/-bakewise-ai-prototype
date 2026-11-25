@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>BakeWise AI - 품질 검사</title>
+<title>BakeWise AI - 프로토타입</title>
 <style>
 *{box-sizing:border-box;font-family:"Malgun Gothic","Apple SD Gothic Neo",sans-serif}
 body{margin:0;background:#eef3f8;color:#1b2430}
@@ -13,15 +13,18 @@ body{margin:0;background:#eef3f8;color:#1b2430}
 .nav{padding:13px 14px;font-size:15px;font-weight:700;border-bottom:1px solid rgba(255,255,255,.12);cursor:pointer}
 .nav.active{background:#6ea4de}
 .main{flex:1;display:flex;flex-direction:column;min-width:0}
-.topbar{background:#fff;border-bottom:1px solid #d7dfe8;padding:10px 16px;display:flex;align-items:center;gap:22px;flex-wrap:wrap}
+.topbar{background:#fff;border-bottom:1px solid #d7dfe8;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
 .title{font-size:17px;font-weight:800}
 .steps{display:flex;gap:18px;font-size:14px;font-weight:700;color:#6b7785}
 .steps .on{color:#2b6cb0}
 .grid{flex:1;display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;padding:12px}
+.grid-2{flex:1;display:grid;grid-template-columns:1.05fr 1.35fr;gap:12px;padding:12px}
 .card{background:#fff;border:1px solid #d7dfe8;border-radius:6px;padding:12px;display:flex;flex-direction:column;justify-content:space-between;gap:10px}
 .pic{width:100%;aspect-ratio:4/3;border-radius:4px;overflow:hidden;background:#111}
 .pic img{width:100%;height:100%;object-fit:cover;display:block}
 .btn{width:100%;padding:11px;border:none;border-radius:5px;background:#3b7ec4;color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+.btn:hover{background:#2f6cb0}
+.btn-sub{width:100%;padding:10px;border:1px solid #3b7ec4;border-radius:5px;background:#eef5fc;color:#2b6cb0;font-size:14px;font-weight:700;cursor:pointer}
 .score-box{display:flex;justify-content:space-between;align-items:center;padding-bottom:8px;border-bottom:1px solid #e6ecf2}
 .num{font-size:32px;font-weight:800;color:#2b6cb0;line-height:1}
 .m{margin-bottom:8px}
@@ -31,7 +34,15 @@ body{margin:0;background:#eef3f8;color:#1b2430}
 .diag{background:#fff0f2;border:1px solid #f3c6ce;border-radius:5px;padding:10px;font-size:13px;line-height:1.45}
 .imp{border:1px solid #d7dfe8;border-radius:5px;padding:10px;background:#fafbfd;font-size:13px;line-height:1.45;margin-top:10px}
 .msg{font-size:12px;font-weight:700;color:#2b6cb0;text-align:center;min-height:16px}
-@media(max-width:850px){.grid{grid-template-columns:1fr}.sidebar{width:130px}}
+.field{margin-bottom:10px}
+.field label{display:block;font-size:13px;font-weight:700;margin-bottom:4px;color:#2c3a4b}
+.field select,.field input{width:100%;padding:9px 10px;border:1px solid #c8d3df;border-radius:5px;font-size:14px;background:#fff}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{border:1px solid #dce4ed;padding:7px 8px;text-align:left}
+th{background:#f2f6fa;font-weight:800}
+.tip-box{background:#f3f8fe;border:1px solid #c9def5;border-radius:5px;padding:9px 10px;font-size:13px;line-height:1.45;color:#1e3f66}
+.note-card{background:#fff;border:1px solid #d7dfe8;border-radius:6px;padding:18px;margin:12px;line-height:1.6}
+@media(max-width:850px){.grid,.grid-2{grid-template-columns:1fr}.sidebar{width:130px}}
 </style>
 </head>
 <body>
@@ -45,16 +56,22 @@ body{margin:0;background:#eef3f8;color:#1b2430}
     <div class="nav" onclick="pickNav(this,'리포트')">리포트</div>
     <div class="nav" onclick="pickNav(this,'설정')">설정</div>
   </aside>
+
   <div class="main">
     <div class="topbar">
-      <div class="title">← 품질 검사</div>
-      <div class="steps">
-        <span id="s1" class="on">① 사진 촬영</span>
-        <span id="s2">② AI 분석 중</span>
-        <span id="s3">③ 결과 확인</span>
+      <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap">
+        <div class="title" id="pageTitle">← 품질 검사</div>
+        <div class="steps" id="qualitySteps">
+          <span id="s1" class="on">① 사진 촬영</span>
+          <span id="s2">② AI 분석 중</span>
+          <span id="s3">③ 결과 확인</span>
+        </div>
       </div>
+      <div class="msg" id="msg"></div>
     </div>
-    <div class="grid">
+
+    <!-- VIEW 1: 품질 관리 (Agent C) -->
+    <div class="grid" id="view-quality">
       <div class="card">
         <div class="pic">
           <img id="img" src="https://images.unsplash.com/photo-1555507036-ab1f4038808a?auto=format&fit=crop&w=900&q=80" alt="크루아상" />
@@ -62,6 +79,7 @@ body{margin:0;background:#eef3f8;color:#1b2430}
         <input type="file" id="f" accept="image/*" style="display:none" />
         <button class="btn" onclick="document.getElementById('f').click()">사진 다시 찍기</button>
       </div>
+
       <div class="card" style="justify-content:flex-start">
         <div style="font-size:17px;font-weight:800">AI 분석 결과</div>
         <div class="score-box">
@@ -73,6 +91,7 @@ body{margin:0;background:#eef3f8;color:#1b2430}
         <div class="m"><div class="m-top"><span>윤기</span><span id="v3">90</span></div><div class="bar"><div class="fill" id="b3" style="width:90%"></div></div></div>
         <div class="m"><div class="m-top"><span>표면 구조</span><span id="v4">88</span></div><div class="bar"><div class="fill" id="b4" style="width:88%"></div></div></div>
       </div>
+
       <div class="card">
         <div>
           <div class="diag">
@@ -87,19 +106,84 @@ body{margin:0;background:#eef3f8;color:#1b2430}
           </div>
         </div>
         <div>
-          <div class="msg" id="msg"></div>
-          <button class="btn" onclick="document.getElementById('msg').textContent='다음 배치에 적용되었습니다.'">다음에 적용하기</button>
+          <button class="btn" onclick="applyQualityFix()">다음에 적용하기</button>
         </div>
       </div>
     </div>
+
+    <!-- VIEW 2: 레시피 관리 (Agent A - 스마트 배합) -->
+    <div class="grid-2" id="view-recipe" style="display:none">
+      <div class="card" style="justify-content:flex-start">
+        <div style="font-size:17px;font-weight:800">생산 정보 입력 (Agent A)</div>
+        <div class="field">
+          <label for="prod">제품 선택</label>
+          <select id="prod">
+            <option value="croissant">크로와상 (기본 레시피)</option>
+            <option value="milkbread">우유식빵 (대체 배합)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="qty">생산량 (개)</label>
+          <input type="number" id="qty" value="20" min="1" max="500" />
+        </div>
+        <div class="field">
+          <label for="mold">틀 크기</label>
+          <select id="mold">
+            <option value="1">기본 (60g 기준)</option>
+            <option value="0.7">미니 (40g 기준)</option>
+            <option value="1.4">대형 (85g 기준)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="altMode">대체 원재료 옵션</label>
+          <select id="altMode">
+            <option value="standard">기본 원재료 유지</option>
+            <option value="plantMilk">식물성 우유(아몬드 밀크) 대체</option>
+            <option value="lowSugar">알룰로스/스테비아 저당 대체</option>
+          </select>
+        </div>
+        <button class="btn" onclick="calcRecipe()">AI 배합 계산하기</button>
+      </div>
+
+      <div class="card" style="justify-content:flex-start">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+          <div style="font-size:17px;font-weight:800">AI 최적 배합 결과</div>
+          <div id="recipeBadge" style="font-size:13px;font-weight:700;color:#2b6cb0">20개 · 기본 (60g 기준)</div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>원재료</th>
+              <th>기존 비율</th>
+              <th>최적 비율</th>
+              <th>사용량</th>
+            </tr>
+          </thead>
+          <tbody id="recipeRows"></tbody>
+        </table>
+        <div class="tip-box" id="recipeTip">
+          AI 추천: 품질 검사에서 표면 색상이 진하게 나왔다면 설탕 비율을 소폭 낮추고 반죽 온도를 안정적으로 유지하세요.
+        </div>
+        <button class="btn-sub" onclick="saveRecipe()">배합표 저장하기</button>
+      </div>
+    </div>
+
+    <!-- VIEW 3: 기타 메뉴 (설계/기획 안내) -->
+    <div class="note-card" id="view-other" style="display:none">
+      <h3 id="otherTitle" style="margin-top:0">메뉴 정보</h3>
+      <p id="otherDesc">현재 프로토타입에서는 핵심 2개 모듈(품질 관리 Agent C, 레시피 관리 Agent A)이 동작하며, 나머지 항목은 Notion 기획 및 에이전트 설계도로 정리되어 있습니다.</p>
+      <button class="btn" style="max-width:220px" onclick="switchTab('품질 관리')">품질 관리로 돌아가기</button>
+    </div>
   </div>
 </div>
+
 <script>
 const data=[
   {sc:82,gr:'보통',m:[85,78,90,88],d1:'▲ 표면 색상이 다소 진함',d2:'오븐 온도가 10℃ 높게 설정되었음 가능성이 있다',p1:'① 오븐 온도를 10℃ 낮춰주세요',p2:'② 다음 배치에서 1분 정도 굽는 시간을 줄여보세요.'},
   {sc:91,gr:'우수',m:[92,90,93,89],d1:'▲ 특이 이상 없음 (양호)',d2:'온도와 굽기 시간 균형이 안정적입니다.',p1:'① 현재 오븐 설정을 유지하세요.',p2:'② 출고 전 표면 윤기만 간단히 확인하세요.'}
 ];
 let idx=0;
+
 document.getElementById('f').addEventListener('change',e=>{
   const file=e.target.files[0]; if(!file) return;
   const r=new FileReader();
@@ -127,11 +211,90 @@ document.getElementById('f').addEventListener('change',e=>{
   };
   r.readAsDataURL(file);
 });
-function pickNav(el,name){
-  document.querySelectorAll('.nav').forEach(n=>n.classList.remove('active'));
-  el.classList.add('active');
-  document.getElementById('msg').textContent=name+' 선택됨';
+
+function applyQualityFix(){
+  document.getElementById('msg').textContent='다음 배치에 적용되었습니다.';
 }
+
+function calcRecipe(){
+  const prod=document.getElementById('prod').value;
+  const qty=Math.max(1,Number(document.getElementById('qty').value)||20);
+  const mold=Number(document.getElementById('mold').value)||1;
+  const alt=document.getElementById('altMode').value;
+  const factor=(qty/20)*mold;
+
+  let items = prod==='croissant' ? [
+    {name:'밀가루(강력분)',base:'100%',opt:'100%',g:500},
+    {name:'버터',base:'30%',opt:'30%',g:150},
+    {name:'설탕',base:'15%',opt:alt==='lowSugar'?'12%':'14%',g:75},
+    {name:'이스트',base:'3%',opt:'3%',g:15},
+    {name:alt==='plantMilk'?'아몬드 밀크(대체)':'우유',base:'12%',opt:'12%',g:60}
+  ] : [
+    {name:'밀가루(식빵용)',base:'100%',opt:'100%',g:600},
+    {name:'버터',base:'12%',opt:'12%',g:72},
+    {name:'설탕',base:'10%',opt:alt==='lowSugar'?'8%':'10%',g:60},
+    {name:'이스트',base:'2.5%',opt:'2.5%',g:15},
+    {name:alt==='plantMilk'?'아몬드 밀크(대체)':'우유',base:'65%',opt:'65%',g:390}
+  ];
+
+  if(alt==='lowSugar'){
+    items[2].name='설탕 + 스테비아 대체';
+  }
+
+  document.getElementById('recipeRows').innerHTML = items.map(it=>`
+    <tr>
+      <td>${it.name}</td>
+      <td>${it.base}</td>
+      <td><strong>${it.opt}</strong></td>
+      <td>${Math.round(it.g*factor)}g</td>
+    </tr>
+  `).join('');
+
+  const moldText=document.getElementById('mold').selectedOptions[0].text;
+  document.getElementById('recipeBadge').textContent=`${qty}개 · ${moldText}`;
+  document.getElementById('recipeTip').textContent =
+    alt==='plantMilk' ? 'AI 추천: 식물성 우유 대체 시 반죽 수분 흡수율을 한 번 더 확인하세요.' :
+    alt==='lowSugar' ? 'AI 추천: 감미료 대체 시 굽기 색상이 연해질 수 있어 오븐 온도를 5℃ 높여보세요.' :
+    'AI 추천: 입력한 생산량과 틀 크기에 맞춰 원재료 사용량을 자동 산출했습니다.';
+  document.getElementById('msg').textContent='배합 계산 완료';
+}
+
+function saveRecipe(){
+  document.getElementById('msg').textContent='최적 배합표가 저장되었습니다.';
+}
+
+function switchTab(name){
+  const navs=document.querySelectorAll('.nav');
+  navs.forEach(n=>{
+    n.classList.toggle('active', n.textContent.trim()===name);
+  });
+  const isQ = name==='품질 관리';
+  const isR = name==='레시피 관리';
+  document.getElementById('view-quality').style.display = isQ ? 'grid' : 'none';
+  document.getElementById('view-recipe').style.display = isR ? 'grid' : 'none';
+  document.getElementById('view-other').style.display = (!isQ && !isR) ? 'block' : 'none';
+  document.getElementById('qualitySteps').style.display = isQ ? 'flex' : 'none';
+  document.getElementById('pageTitle').textContent = isQ ? '← 품질 검사' : (isR ? '← 레시피 관리 (스마트 배합)' : `← ${name}`);
+
+  if(!isQ && !isR){
+    const infoMap={
+      '홈':'매장 전체 요약(원재료 재고, 생산량, 품질 점수) 기획 화면입니다. 핵심 프로토타입은 [품질 관리]와 [레시피 관리]에서 체험할 수 있습니다.',
+      '재고 관리':'Agent B(유통기한·재고 추천) 설계가 반영된 영역입니다. 현재 프로토타입에서는 [품질 관리]와 [레시피 관리]가 동작합니다.',
+      '리포트':'생산 현황·원재료 사용량·품질 분석 리포트 기획 화면입니다. Notion 문서에 상세 설계가 정리되어 있습니다.',
+      '설정':'매장 정보 및 알림 설정 기획 화면입니다. Notion 문서에 상세 설계가 정리되어 있습니다.'
+    };
+    document.getElementById('otherTitle').textContent = `${name} (기획/설계 안내)`;
+    document.getElementById('otherDesc').textContent = infoMap[name] || '';
+  }
+  document.getElementById('msg').textContent = `${name} 선택됨`;
+}
+
+function pickNav(el,name){
+  switchTab(name);
+}
+
+calcRecipe();
 </script>
 </body>
 </html>
+
