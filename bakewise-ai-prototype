@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>BakeWise AI - 품질 검사</title>
+<style>
+*{box-sizing:border-box;font-family:"Malgun Gothic","Apple SD Gothic Neo",sans-serif}
+body{margin:0;background:#eef3f8;color:#1b2430}
+.app{display:flex;min-height:100vh}
+.sidebar{width:170px;background:#4e89c9;color:#fff;flex-shrink:0}
+.brand{padding:16px 14px;font-size:19px;font-weight:800;border-bottom:1px solid rgba(255,255,255,.25)}
+.nav{padding:13px 14px;font-size:15px;font-weight:700;border-bottom:1px solid rgba(255,255,255,.12);cursor:pointer}
+.nav.active{background:#6ea4de}
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
+.topbar{background:#fff;border-bottom:1px solid #d7dfe8;padding:10px 16px;display:flex;align-items:center;gap:22px;flex-wrap:wrap}
+.title{font-size:17px;font-weight:800}
+.steps{display:flex;gap:18px;font-size:14px;font-weight:700;color:#6b7785}
+.steps .on{color:#2b6cb0}
+.grid{flex:1;display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;padding:12px}
+.card{background:#fff;border:1px solid #d7dfe8;border-radius:6px;padding:12px;display:flex;flex-direction:column;justify-content:space-between;gap:10px}
+.pic{width:100%;aspect-ratio:4/3;border-radius:4px;overflow:hidden;background:#111}
+.pic img{width:100%;height:100%;object-fit:cover;display:block}
+.btn{width:100%;padding:11px;border:none;border-radius:5px;background:#3b7ec4;color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+.score-box{display:flex;justify-content:space-between;align-items:center;padding-bottom:8px;border-bottom:1px solid #e6ecf2}
+.num{font-size:32px;font-weight:800;color:#2b6cb0;line-height:1}
+.m{margin-bottom:8px}
+.m-top{display:flex;justify-content:space-between;font-size:14px;font-weight:700;margin-bottom:4px}
+.bar{height:12px;background:#e3e9f0;border-radius:3px;overflow:hidden}
+.fill{height:100%;background:#3b7ec4}
+.diag{background:#fff0f2;border:1px solid #f3c6ce;border-radius:5px;padding:10px;font-size:13px;line-height:1.45}
+.imp{border:1px solid #d7dfe8;border-radius:5px;padding:10px;background:#fafbfd;font-size:13px;line-height:1.45;margin-top:10px}
+.msg{font-size:12px;font-weight:700;color:#2b6cb0;text-align:center;min-height:16px}
+@media(max-width:850px){.grid{grid-template-columns:1fr}.sidebar{width:130px}}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">BakeWise AI</div>
+    <div class="nav" onclick="pickNav(this,'홈')">홈</div>
+    <div class="nav" onclick="pickNav(this,'레시피 관리')">레시피 관리</div>
+    <div class="nav" onclick="pickNav(this,'재고 관리')">재고 관리</div>
+    <div class="nav active" onclick="pickNav(this,'품질 관리')">품질 관리</div>
+    <div class="nav" onclick="pickNav(this,'리포트')">리포트</div>
+    <div class="nav" onclick="pickNav(this,'설정')">설정</div>
+  </aside>
+  <div class="main">
+    <div class="topbar">
+      <div class="title">← 품질 검사</div>
+      <div class="steps">
+        <span id="s1" class="on">① 사진 촬영</span>
+        <span id="s2">② AI 분석 중</span>
+        <span id="s3">③ 결과 확인</span>
+      </div>
+    </div>
+    <div class="grid">
+      <div class="card">
+        <div class="pic">
+          <img id="img" src="https://images.unsplash.com/photo-1555507036-ab1f4038808a?auto=format&fit=crop&w=900&q=80" alt="크루아상" />
+        </div>
+        <input type="file" id="f" accept="image/*" style="display:none" />
+        <button class="btn" onclick="document.getElementById('f').click()">사진 다시 찍기</button>
+      </div>
+      <div class="card" style="justify-content:flex-start">
+        <div style="font-size:17px;font-weight:800">AI 분석 결과</div>
+        <div class="score-box">
+          <div><span class="num" id="sc">82</span> <span style="font-size:13px;color:#5a6775">/ 100</span></div>
+          <div style="font-size:15px;font-weight:800">품질 등급: <span id="gr" style="color:#2b6cb0">보통</span></div>
+        </div>
+        <div class="m"><div class="m-top"><span>크기</span><span id="v1">85</span></div><div class="bar"><div class="fill" id="b1" style="width:85%"></div></div></div>
+        <div class="m"><div class="m-top"><span>표면 색상</span><span id="v2">78</span></div><div class="bar"><div class="fill" id="b2" style="width:78%"></div></div></div>
+        <div class="m"><div class="m-top"><span>윤기</span><span id="v3">90</span></div><div class="bar"><div class="fill" id="b3" style="width:90%"></div></div></div>
+        <div class="m"><div class="m-top"><span>표면 구조</span><span id="v4">88</span></div><div class="bar"><div class="fill" id="b4" style="width:88%"></div></div></div>
+      </div>
+      <div class="card">
+        <div>
+          <div class="diag">
+            <div style="font-weight:800;color:#b42318;margin-bottom:4px">▲ 문제 진단</div>
+            <div id="d1" style="font-weight:700;margin-bottom:4px">▲ 표면 색상이 다소 진함</div>
+            <div id="d2">오븐 온도가 10℃ 높게 설정되었음 가능성이 있다</div>
+          </div>
+          <div class="imp">
+            <div style="font-weight:800;text-align:center;border-bottom:1px solid #e2e8f0;padding-bottom:4px;margin-bottom:6px">개선 방법</div>
+            <div id="p1" style="margin-bottom:4px">① 오븐 온도를 10℃ 낮춰주세요</div>
+            <div id="p2">② 다음 배치에서 1분 정도 굽는 시간을 줄여보세요.</div>
+          </div>
+        </div>
+        <div>
+          <div class="msg" id="msg"></div>
+          <button class="btn" onclick="document.getElementById('msg').textContent='다음 배치에 적용되었습니다.'">다음에 적용하기</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+const data=[
+  {sc:82,gr:'보통',m:[85,78,90,88],d1:'▲ 표면 색상이 다소 진함',d2:'오븐 온도가 10℃ 높게 설정되었음 가능성이 있다',p1:'① 오븐 온도를 10℃ 낮춰주세요',p2:'② 다음 배치에서 1분 정도 굽는 시간을 줄여보세요.'},
+  {sc:91,gr:'우수',m:[92,90,93,89],d1:'▲ 특이 이상 없음 (양호)',d2:'온도와 굽기 시간 균형이 안정적입니다.',p1:'① 현재 오븐 설정을 유지하세요.',p2:'② 출고 전 표면 윤기만 간단히 확인하세요.'}
+];
+let idx=0;
+document.getElementById('f').addEventListener('change',e=>{
+  const file=e.target.files[0]; if(!file) return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    document.getElementById('img').src=ev.target.result;
+    document.getElementById('s1').className='';
+    document.getElementById('s2').className='on';
+    document.getElementById('msg').textContent='AI 분석 중...';
+    setTimeout(()=>{
+      idx=(idx+1)%data.length; const d=data[idx];
+      document.getElementById('sc').textContent=d.sc;
+      document.getElementById('gr').textContent=d.gr;
+      d.m.forEach((v,i)=>{
+        document.getElementById('v'+(i+1)).textContent=v;
+        document.getElementById('b'+(i+1)).style.width=v+'%';
+      });
+      document.getElementById('d1').textContent=d.d1;
+      document.getElementById('d2').textContent=d.d2;
+      document.getElementById('p1').textContent=d.p1;
+      document.getElementById('p2').textContent=d.p2;
+      document.getElementById('s2').className='';
+      document.getElementById('s3').className='on';
+      document.getElementById('msg').textContent='분석 완료';
+    },600);
+  };
+  r.readAsDataURL(file);
+});
+function pickNav(el,name){
+  document.querySelectorAll('.nav').forEach(n=>n.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('msg').textContent=name+' 선택됨';
+}
+</script>
+</body>
+</html>
